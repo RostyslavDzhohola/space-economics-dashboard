@@ -96,27 +96,83 @@ body::before {
   color: var(--muted);
 }
 
-.hero-metrics {
+.equation-grid {
   display: grid;
   gap: 16px;
   margin-top: 28px;
-  font-size: 0.95rem;
-  color: #d7def7;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
-.hero-metrics strong {
-  display: block;
+.equation-card {
+  border: 1px solid rgba(126, 249, 255, 0.24);
+  padding: 20px 22px;
+}
+
+.equation-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.equation-tag {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+.equation-title {
+  margin-top: 6px;
   font-family: 'Unbounded', sans-serif;
   font-size: 0.95rem;
-  margin-top: 6px;
   color: #f7f8ff;
 }
 
-.metric-label {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.65rem;
+.equation-copy {
+  background: rgba(126, 249, 255, 0.12);
+  border: 1px solid rgba(126, 249, 255, 0.35);
+  color: var(--accent);
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.equation-copy:hover {
+  background: rgba(126, 249, 255, 0.2);
+}
+
+.equation-copy:active {
+  transform: translateY(1px);
+}
+
+.equation-copy:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.equation-body {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(6, 10, 20, 0.6);
+  border: 1px solid rgba(126, 249, 255, 0.16);
+}
+
+.equation-body .katex-display {
+  margin: 0;
+}
+
+.equation-note {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
   color: var(--muted);
+}
+
+.katex {
+  color: #f7f8ff;
 }
 
 main {

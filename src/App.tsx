@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { BlockMath, InlineMath } from 'react-katex'
 
 const formatNumber = (value: number, digits = 2) => {
   if (!Number.isFinite(value)) return '—'
@@ -58,6 +59,45 @@ const InputField = ({ label, value, onChange, step, min, max, suffix, hint }: In
     {hint && <span className="field-hint">{hint}</span>}
   </label>
 )
+
+type EquationCardProps = {
+  title: string
+  latex: string
+  note?: string
+}
+
+const EquationCard = ({ title, latex, note }: EquationCardProps) => {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    if (!navigator?.clipboard) return
+    try {
+      await navigator.clipboard.writeText(latex)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1400)
+    } catch (error) {
+      setCopied(false)
+    }
+  }
+
+  return (
+    <div className="card equation-card">
+      <div className="equation-header">
+        <div>
+          <span className="equation-tag">Equation</span>
+          <div className="equation-title">{title}</div>
+        </div>
+        <button type="button" className="equation-copy" onClick={handleCopy}>
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <div className="equation-body">
+        <BlockMath math={latex} />
+      </div>
+      {note && <p className="equation-note">{note}</p>}
+    </div>
+  )
+}
 
 const App = () => {
   const [breakEven, setBreakEven] = useState({
@@ -171,28 +211,48 @@ const App = () => {
   const leverageCards = [
     {
       title: 'Reduce findings + rework (hit the tail)',
-      detail:
-        'Design changes that eliminate the top refurb defects collapse t_turn,95 and boost on-time probability.',
+      detail: (
+        <>
+          Design changes that eliminate the top refurb defects collapse{' '}
+          <InlineMath math="t_{turn,95}" /> and boost on-time probability.
+        </>
+      ),
     },
     {
       title: 'Cut C_ref by removing labor-hours',
-      detail:
-        'Access panels, standardized fasteners, and modular swaps reduce dollars-per-flight directly.',
+      detail: (
+        <>
+          Access panels, standardized fasteners, and modular swaps reduce{' '}
+          <InlineMath math="C_{ref}" /> per flight directly.
+        </>
+      ),
     },
     {
       title: 'Raise recovery probability (p_rec)',
-      detail:
-        'Higher survival improves amortization and reduces spares needed for cadence reliability.',
+      detail: (
+        <>
+          Higher <InlineMath math="p_{rec}" /> improves amortization and reduces spares needed for
+          cadence reliability.
+        </>
+      ),
     },
     {
       title: 'Increase reusable payload ratio (P_r/P_e)',
-      detail:
-        'Payload penalty drives $/kg. A few points of mass reduction unlock large refurb headroom.',
+      detail: (
+        <>
+          Payload penalty drives $/kg. A few points of mass reduction in{' '}
+          <InlineMath math="P_r/P_e" /> unlock large refurb headroom.
+        </>
+      ),
     },
     {
       title: 'Shorten replacement lead time (L_replace)',
-      detail:
-        'Faster replacement means fewer spares and more resilience to anomalies.',
+      detail: (
+        <>
+          Faster <InlineMath math="L_{replace}" /> means fewer spares and more resilience to
+          anomalies.
+        </>
+      ),
     },
   ]
 
@@ -205,15 +265,17 @@ const App = () => {
           Turn engineering assumptions into a quantified yes/no on reuse. Calculate break-even refurb cost,
           cadence feasibility, and the levers that move $/kg fastest.
         </p>
-        <div className="hero-metrics">
-          <div>
-            <span className="metric-label">Break-even equation</span>
-            <strong>C_ref,max = C_e·(P_r/P_e) - C_common - C1_mfg/N_eff</strong>
-          </div>
-          <div>
-            <span className="metric-label">Cadence threshold</span>
-            <strong>t_turn,95 ≤ 365·u_target·(B(1-d_down)-S)/R</strong>
-          </div>
+        <div className="equation-grid">
+          <EquationCard
+            title="Break-even refurb ceiling"
+            latex="C_{ref,max} = C_e \\cdot \\frac{P_r}{P_e} - C_{common} - \\frac{C_{1,\\text{mfg}}}{N_{eff}}"
+            note="Reuse closes if refurb + recovery stays below this per-flight ceiling."
+          />
+          <EquationCard
+            title="Cadence threshold"
+            latex="t_{turn,95} \\le \\frac{365\\,u_{target}\\,(B(1-d_{down}) - S)}{R}"
+            note="Turnaround tail must sit under the slack-adjusted limit."
+          />
         </div>
       </header>
 
@@ -232,9 +294,16 @@ const App = () => {
                 ceiling.
               </p>
               <ul>
-                <li>Lower payload penalty (P_r/P_e) creates refurb headroom.</li>
-                <li>Higher p_rec boosts N_eff and reduces the amortized cost.</li>
-                <li>Refurb cost enters dollar-for-dollar.</li>
+                <li>
+                  Lower payload penalty (<InlineMath math="P_r/P_e" />) creates refurb headroom.
+                </li>
+                <li>
+                  Higher <InlineMath math="p_{rec}" /> boosts <InlineMath math="N_{eff}" /> and reduces
+                  the amortized cost.
+                </li>
+                <li>
+                  Refurb cost <InlineMath math="C_{ref}" /> enters dollar-for-dollar.
+                </li>
               </ul>
             </div>
             <div className="card">
@@ -244,9 +313,15 @@ const App = () => {
                 slack and replacement lead time set the max turnaround you can tolerate.
               </p>
               <ul>
-                <li>t_turn,95 must stay below the slack-adjusted threshold.</li>
-                <li>Attrition drives spare requirement S and shrinks capacity.</li>
-                <li>Higher R tightens everything.</li>
+                <li>
+                  <InlineMath math="t_{turn,95}" /> must stay below the slack-adjusted threshold.
+                </li>
+                <li>
+                  Attrition drives spare requirement <InlineMath math="S" /> and shrinks capacity.
+                </li>
+                <li>
+                  Higher <InlineMath math="R" /> tightens everything.
+                </li>
               </ul>
             </div>
           </div>
@@ -437,12 +512,24 @@ const App = () => {
             <div className="card">
               <h3>Inputs (from panel)</h3>
               <ul className="list">
-                <li>P_e = 16,000 kg, P_r = 14,000 kg</li>
-                <li>C_common = $20M, C1_mfg = $20M</li>
-                <li>p_rec = 0.95, N_design = 10</li>
-                <li>R = 20/yr, B = 4, d_down = 0.10</li>
-                <li>L_replace = 180 days, u_target = 0.70</li>
-                <li>Example refurb: C_ref = $6M</li>
+                <li>
+                  <InlineMath math="P_e = 16{,}000\\ \\text{kg},\\quad P_r = 14{,}000\\ \\text{kg}" />
+                </li>
+                <li>
+                  <InlineMath math="C_{common} = \\$20\\text{M},\\quad C_{1,\\text{mfg}} = \\$20\\text{M}" />
+                </li>
+                <li>
+                  <InlineMath math="p_{rec} = 0.95,\\quad N_{design} = 10" />
+                </li>
+                <li>
+                  <InlineMath math="R = 20/\\text{yr},\\quad B = 4,\\quad d_{down} = 0.10" />
+                </li>
+                <li>
+                  <InlineMath math="L_{replace} = 180\\ \\text{days},\\quad u_{target} = 0.70" />
+                </li>
+                <li>
+                  Example refurb: <InlineMath math="C_{ref} = \\$6\\text{M}" />
+                </li>
               </ul>
             </div>
             <div className="card">
