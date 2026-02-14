@@ -1,5 +1,9 @@
 import { useMemo, useState } from 'react'
 import { BlockMath, InlineMath } from 'react-katex'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import HeroScene from './HeroScene'
+import panelContent from './content/panel.md?raw'
 
 const formatNumber = (value: number, digits = 2) => {
   if (!Number.isFinite(value)) return '—'
@@ -210,20 +214,20 @@ const App = () => {
 
   const leverageCards = [
     {
-      title: 'Reduce findings + rework (hit the tail)',
+      title: 'Kill top refurb findings (hit the tail)',
       detail: (
         <>
-          Design changes that eliminate the top refurb defects collapse{' '}
-          <InlineMath math="t_{turn,95}" /> and boost on-time probability.
+          Fix the top defects to collapse <InlineMath math="t_{turn,95}" /> and improve on-time
+          probability.
         </>
       ),
     },
     {
-      title: 'Cut C_ref by removing labor-hours',
+      title: 'Strip labor hours from refurb',
       detail: (
         <>
-          Access panels, standardized fasteners, and modular swaps reduce{' '}
-          <InlineMath math="C_{ref}" /> per flight directly.
+          Access panels, standardized fasteners, and modular swaps drop{' '}
+          <InlineMath math="C_{ref}" /> fast.
         </>
       ),
     },
@@ -232,24 +236,23 @@ const App = () => {
       detail: (
         <>
           Higher <InlineMath math="p_{rec}" /> improves amortization and reduces spares needed for
-          cadence reliability.
+          cadence.
         </>
       ),
     },
     {
-      title: 'Increase reusable payload ratio (P_r/P_e)',
+      title: 'Protect payload ratio (P_r/P_e)',
       detail: (
         <>
-          Payload penalty drives $/kg. A few points of mass reduction in{' '}
-          <InlineMath math="P_r/P_e" /> unlock large refurb headroom.
+          Payload penalty drives $/kg. Shave recovery mass without growing refurb scope.
         </>
       ),
     },
     {
-      title: 'Shorten replacement lead time (L_replace)',
+      title: 'Shorten replacement lead time',
       detail: (
         <>
-          Faster <InlineMath math="L_{replace}" /> means fewer spares and more resilience to
+          Faster <InlineMath math="L_{replace}" /> means fewer spares and stronger resilience to
           anomalies.
         </>
       ),
@@ -259,22 +262,29 @@ const App = () => {
   return (
     <div className="app">
       <header className="hero">
-        <div className="hero-tag">Reusable First-Stage Economics</div>
-        <h1>Reusability Economics — Interactive Decision Deck</h1>
-        <p className="hero-sub">
-          Turn engineering assumptions into a quantified yes/no on reuse. Calculate break-even refurb cost,
-          cadence feasibility, and the levers that move $/kg fastest.
-        </p>
+        <div className="hero-grid">
+          <div className="hero-copy">
+            <div className="hero-tag">Reusable First-Stage Economics</div>
+            <h1>First-Stage Reuse — Go/No-Go</h1>
+            <p className="hero-sub">
+              Plug in payload, refurb, and cadence. Clear the $/kg gate and the turnaround gate.
+            </p>
+          </div>
+          <div className="hero-visual">
+            <HeroScene />
+            <div className="hero-glow" aria-hidden="true" />
+          </div>
+        </div>
         <div className="equation-grid">
           <EquationCard
-            title="Break-even refurb ceiling"
+            title="Refurb ceiling ($/kg gate)"
             latex="C_{ref,max} = C_e \\cdot \\frac{P_r}{P_e} - C_{common} - \\frac{C_{1,\\text{mfg}}}{N_{eff}}"
-            note="Reuse closes if refurb + recovery stays below this per-flight ceiling."
+            note="Reuse closes if refurb + recovery stay under this ceiling."
           />
           <EquationCard
-            title="Cadence threshold"
+            title="Turnaround ceiling (cadence gate)"
             latex="t_{turn,95} \\le \\frac{365\\,u_{target}\\,(B(1-d_{down}) - S)}{R}"
-            note="Turnaround tail must sit under the slack-adjusted limit."
+            note="Tail turnaround must fit inside slack-adjusted capacity."
           />
         </div>
       </header>
@@ -283,44 +293,43 @@ const App = () => {
         <section id="summary" className="section">
           <div className="section-heading">
             <p className="section-kicker">Executive summary</p>
-            <h2>Two gates decide reuse: $/kg and schedule reliability.</h2>
+            <h2>Two gates decide reuse: $/kg + cadence.</h2>
           </div>
           <div className="summary-grid">
             <div className="card">
-              <h3>Gate 1 — Cost per kg</h3>
+              <h3>Gate 1 — $/kg</h3>
               <p>
-                Reuse wins when the amortized first-stage cost plus refurb is low enough to beat expendable
-                $/kg after payload penalty. Recovery probability and designed reuse life set the amortization
-                ceiling.
+                Reuse wins when amortized stage cost plus refurb beats expendable $/kg after payload
+                penalty.
               </p>
               <ul>
                 <li>
-                  Lower payload penalty (<InlineMath math="P_r/P_e" />) creates refurb headroom.
+                  Higher <InlineMath math="P_r/P_e" /> creates refurb headroom.
                 </li>
                 <li>
-                  Higher <InlineMath math="p_{rec}" /> boosts <InlineMath math="N_{eff}" /> and reduces
-                  the amortized cost.
+                  Higher <InlineMath math="p_{rec}" /> raises <InlineMath math="N_{eff}" /> and lowers
+                  amortized cost.
                 </li>
                 <li>
-                  Refurb cost <InlineMath math="C_{ref}" /> enters dollar-for-dollar.
+                  Refurb cost <InlineMath math="C_{ref}" /> is dollar-for-dollar.
                 </li>
               </ul>
             </div>
             <div className="card">
-              <h3>Gate 2 — Cadence feasibility</h3>
+              <h3>Gate 2 — Cadence</h3>
               <p>
-                Hitting promised cadence depends on the 95th-percentile turnaround time, not the median. Fleet
-                slack and replacement lead time set the max turnaround you can tolerate.
+                Cadence lives in the tail. The 95th-percentile turnaround must clear the
+                slack-adjusted threshold.
               </p>
               <ul>
                 <li>
-                  <InlineMath math="t_{turn,95}" /> must stay below the slack-adjusted threshold.
+                  <InlineMath math="t_{turn,95}" /> must stay under the cap.
                 </li>
                 <li>
-                  Attrition drives spare requirement <InlineMath math="S" /> and shrinks capacity.
+                  Attrition drives spares <InlineMath math="S" /> and shrinks capacity.
                 </li>
                 <li>
-                  Higher <InlineMath math="R" /> tightens everything.
+                  Higher <InlineMath math="R" /> tightens the window.
                 </li>
               </ul>
             </div>
@@ -330,7 +339,7 @@ const App = () => {
         <section id="break-even" className="section">
           <div className="section-heading">
             <p className="section-kicker">Calculator 01</p>
-            <h2>$/kg break-even — refurb cost ceiling</h2>
+            <h2>$/kg gate — refurb ceiling</h2>
           </div>
           <div className="calculator">
             <div className="card">
@@ -395,17 +404,17 @@ const App = () => {
                   <strong>{formatPerKg(breakEvenResults.costPerKgE)}</strong>
                 </div>
                 <div>
-                  <span>Break-even refurb ceiling</span>
+                  <span>Refurb ceiling</span>
                   <strong>{formatMoney(breakEvenResults.C_ref_max, 2)}</strong>
                 </div>
                 <div>
-                  <span>Reusable cost / kg at threshold</span>
+                  <span>Reusable $/kg @ ceiling</span>
                   <strong>{formatPerKg(breakEvenResults.costPerKgR)}</strong>
                 </div>
               </div>
               <div className="result-callout">
                 <p>
-                  Reuse wins if your actual refurb + recovery cost per flight stays below
+                  Reuse wins if refurb + recovery stays below
                   <strong> {formatMoney(breakEvenResults.C_ref_max, 2)}</strong>.
                 </p>
               </div>
@@ -416,7 +425,7 @@ const App = () => {
         <section id="cadence" className="section">
           <div className="section-heading">
             <p className="section-kicker">Calculator 02</p>
-            <h2>Cadence feasibility — turnaround threshold</h2>
+            <h2>Cadence gate — turnaround ceiling</h2>
           </div>
           <div className="calculator">
             <div className="card">
@@ -496,8 +505,8 @@ const App = () => {
               </div>
               <div className={`status ${cadenceResults.feasible ? 'pass' : 'fail'}`}>
                 {cadenceResults.feasible
-                  ? 'Feasible cadence: tail turnaround meets threshold.'
-                  : 'Not feasible: reduce t_turn,95 or add capacity.'}
+                  ? 'Cadence green: tail turnaround clears threshold.'
+                  : 'Cadence red: cut tail or add capacity.'}
               </div>
             </div>
           </div>
@@ -506,7 +515,7 @@ const App = () => {
         <section id="worked-example" className="section">
           <div className="section-heading">
             <p className="section-kicker">Worked example</p>
-            <h2>Illustrative medium-lift case</h2>
+            <h2>Medium-lift example</h2>
           </div>
           <div className="example-grid">
             <div className="card">
@@ -558,7 +567,7 @@ const App = () => {
               </div>
             </div>
             <div className="card chart-card">
-              <h3>Sensitivity: refurb headroom vs payload ratio</h3>
+              <h3>Sensitivity — refurb headroom vs payload ratio</h3>
               <svg viewBox={`0 0 ${chart.width} ${chart.height}`} className="line-chart">
                 <defs>
                   <linearGradient id="lineGlow" x1="0" x2="1" y1="0" y2="0">
@@ -593,7 +602,7 @@ const App = () => {
         <section id="levers" className="section">
           <div className="section-heading">
             <p className="section-kicker">Ranked levers</p>
-            <h2>Highest ROI moves per unit complexity</h2>
+            <h2>Top levers per complexity</h2>
           </div>
           <div className="lever-grid">
             {leverageCards.map((lever, index) => (
@@ -605,13 +614,26 @@ const App = () => {
             ))}
           </div>
         </section>
+
+        <section id="full-research" className="section full-research">
+          <div className="section-heading">
+            <p className="section-kicker">Full research</p>
+            <h2>Specialist panel notes and full model</h2>
+            <p className="section-sub">
+              Long-form writeup with formulas, assumptions, and the full lever stack. Skim or dive
+              deep.
+            </p>
+          </div>
+          <div className="card research-card">
+            <div className="research-content">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{panelContent}</ReactMarkdown>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className="footer">
-        <p>
-          Built for rapid reuse decisions. Use with real cost and turnaround distributions once you have
-          measured data.
-        </p>
+        <p>Built for fast reuse go/no-go. Swap in real distributions once you have measured data.</p>
       </footer>
     </div>
   )
